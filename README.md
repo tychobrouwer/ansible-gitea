@@ -6,7 +6,13 @@ The role installs and configures Gitea with postgresql for my servers.
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+```gitea_db_password``` has to be set to the password used for the postgresql database.
+
+```gitea_user_name``` and ```gitea_user_group``` can be set to the user and group used for the gitea service.
+
+```gitea_db_user``` and ```gitea_db_name``` can be set to the user and database name.
+
+```gitea_port``` can be set to the port used.
 
 Example Playbook
 ----------------
@@ -16,7 +22,7 @@ Example Playbook
       roles:
          - { role: tychobrouwer.gitea, gitea_db_password: "password" }
          - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_user_name: "gitea", gitea_user_group: "gitea",
-             gitea_db_user: "gitea", gitea_db_name: "gitea", gitea_port: 3000, gitea_postgres_version: 5432 }
+             gitea_db_user: "gitea", gitea_db_name: "gitea", gitea_port: 3000 }
 ```
 
 License
