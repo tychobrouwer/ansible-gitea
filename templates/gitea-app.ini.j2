@@ -1,0 +1,84 @@
+APP_NAME = "Tycho Brouwer's Gitea"
+RUN_USER = {{ gitea_user_name }}
+WORK_PATH = /var/lib/gitea
+RUN_MODE = prod
+
+[server]
+LOCAL_ROOT_URL = http://localhost:{{ gitea_port }}/
+SSH_DOMAIN = {{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}
+DOMAIN = {{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}
+HTTP_PORT = {{ gitea_port }}
+ROOT_URL = http://{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:{{ gitea_port }}/
+APP_DATA_PATH = /var/lib/gitea/data
+DISABLE_SSH = false
+SSH_PORT = 22
+LFS_START_SERVER = true
+{% if gitea_LFS_JWT_SECRET is defined %}
+LFS_JWT_SECRET = {{ gitea_LFS_JWT_SECRET }}
+{% endif %}
+OFFLINE_MODE = false
+
+[database]
+DB_TYPE = postgres
+HOST = 127.0.0.1:5432
+NAME = {{ gitea_db_name }}
+USER = {{ gitea_db_user }}
+PASSWD = `{{ gitea_db_user_password }}`
+SCHEMA =
+SSL_MODE = disable
+PATH = /var/lib/gitea/data/gitea.db
+LOG_SQL = false
+
+[repository]
+ROOT = /home/{{ gitea_user_name }}/repositories
+
+[lfs]
+PATH = /home/{{ gitea_user_name }}/lfs
+
+[mailer]
+ENABLED = false
+
+[service]
+REGISTER_EMAIL_CONFIRM = false
+ENABLE_NOTIFY_MAIL = false
+DISABLE_REGISTRATION = true
+ALLOW_ONLY_EXTERNAL_REGISTRATION = false
+ENABLE_CAPTCHA = false
+REQUIRE_SIGNIN_VIEW = false
+DEFAULT_KEEP_EMAIL_PRIVATE = false
+DEFAULT_ALLOW_CREATE_ORGANIZATION = true
+DEFAULT_ENABLE_TIMETRACKING = true
+NO_REPLY_ADDRESS = noreply.localhost
+
+[openid]
+ENABLE_OPENID_SIGNIN = true
+ENABLE_OPENID_SIGNUP = true
+
+[cron.update_checker]
+ENABLED = false
+
+[session]
+PROVIDER = file
+
+[log]
+MODE = console
+LEVEL = info
+ROOT_PATH = /var/lib/gitea/log
+
+[repository.pull-request]
+DEFAULT_MERGE_STYLE = merge
+
+[repository.signing]
+DEFAULT_TRUST_MODEL = committer
+
+[security]
+INSTALL_LOCK = true
+{% if gitea_INTERNAL_TOKEN is defined %}
+INTERNAL_TOKEN = {{ gitea_INTERNAL_TOKEN }}
+{% endif %}
+PASSWORD_HASH_ALGO = pbkdf2
+
+[oauth2]
+{% if gitea_JWT_SECRET is defined %}
+JWT_SECRET = {{ gitea_JWT_SECRET }}
+{% endif %}

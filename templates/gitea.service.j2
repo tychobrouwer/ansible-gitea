@@ -1,0 +1,25 @@
+[Unit]
+Description=Gitea (Git with a cup of tea)
+After=syslog.target
+After=network.target
+After=postgresql.service
+Wants=postgresql.service
+After=gitea.main.socket
+Requires=gitea.main.socket
+
+[Service]
+# Uncomment the next line if you have repos with lots of files and get a HTTP 500 error because of that
+# LimitNOFILE=524288:524288
+RestartSec=2s
+Type=notify
+User={{ gitea_user_name }}
+Group={{ gitea_user_group }}
+WorkingDirectory=/var/lib/gitea/
+RuntimeDirectory=gitea
+ExecStart=/usr/bin/gitea web --port {{ gitea_port }}
+Restart=always
+Environment=USER={{ gitea_user_name }} HOME=/home/gitea GITEA_WORK_DIR=/var/lib/gitea
+WatchdogSec=30s
+
+[Install]
+WantedBy=multi-user.target

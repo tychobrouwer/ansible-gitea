@@ -1,0 +1,11 @@
+[Unit]
+Description=Gitea Web Socket
+PartOf=gitea.service
+
+[Socket]
+Service=gitea.service
+ListenStream=3001
+NoDelay=true
+
+[Install]
+WantedBy=sockets.target

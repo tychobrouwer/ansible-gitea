@@ -1,0 +1,163 @@
+---
+# tasks file for ansible-gitea
+---
+- name: Add gitea git user
+  ansible.builtin.user:
+    name: "{{ gitea_user_name }}"
+    home: "/home/{{ gitea_user_name }}"
+    system: true
+    shell: /bin/bash
+    password: "!"
+    comment: Git Version Control
+
+- name: Ensure repositories directory exists
+  ansible.builtin.file:
+    path: "/home/{{ gitea_user_name }}/repositories"
+    state: directory
+    owner: "{{ gitea_user_name }}"
+    group: "{{ gitea_user_group}}"
+    mode: 0755
+
+- name: Ensure LFS directory exists
+  ansible.builtin.file:
+    path: "/home/{{ gitea_user_name }}/lfs"
+    state: directory
+    owner: "{{ gitea_user_name }}"
+    group: "{{ gitea_user_group}}"
+    mode: 0755
+
+- name: Update cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure gitea GPG signing key is installed
+  ansible.builtin.apt_key:
+    url: "{{ gitea_deb_gpg }}"
+    state: present
+
+- name: Ensure gitea repository is added
+  ansible.builtin.apt_repository:
+    repo: "{{ gitea_deb_repo }}"
+    state: present
+
+- name: Install gitea and database packages
+  ansible.builtin.package:
+    name:
+      - git
+      - gitea
+      - postgresql
+      - postgresql-contrib
+    state: latest
+
+- name: Set postgresql password encryption
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    regexp: "^password_encryption = "
+    insertafter: "^#password_encryption = "
+    line: password_encryption = scram-sha-256
+
+- name: Create the gitea database user
+  community.postgresql.postgresql_user:
+    name: "{{ gitea_db_user }}"
+    password: "{{ gitea_db_password }}"
+  become: true
+  become_user: postgres
+  become_method: su
+
+- name: Ensure a locale exists
+  community.general.locale_gen:
+    name: en_US.UTF-8
+    state: present
+
+- name: Create the gitea database
+  community.postgresql.postgresql_db:
+    name: "{{ gitea_db_name }}"
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+    owner: "{{ gitea_db_user }}"
+  become: true
+  become_user: postgres
+
+- name: Grant gitea user access to database
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    contype: local
+    users: "{{ gitea_db_user }}"
+    databases: "{{ gitea_db_name }}"
+    method: scram-sha-256
+    create: true
+
+- name: Connect to database
+  community.postgresql.postgresql_user:
+    db: "{{ gitea_db_name }}"
+    name: "{{ gitea_db_user }}"
+  become: true
+  become_user: postgres
+
+- name: Get current gitea config
+  ansible.builtin.slurp:
+    src: /var/lib/gitea/custom/conf/app.ini
+  register: gitea_config
+
+- name: Set tokens from config
+  ansible.builtin.set_fact:
+    gitea_INTERNAL_TOKEN: >
+      gitea_config.content |
+      b64decode |
+      regex_search('INTERNAL_TOKEN =(.*)') |
+      regex_replace('INTERNAL_TOKEN =', '') |
+      regex_replace(' ', '')
+    gitea_LFS_JWT_SECRET: >
+      gitea_config.content |
+      b64decode |
+      regex_search('LFS_JWT_SECRET =(.*)') |
+      regex_replace('LFS_JWT_SECRET =', '') |
+      regex_replace(' ', '')
+    gitea_JWT_SECRET: >
+      gitea_config.content |
+      b64decode |
+      regex_search('JWT_SECRET =(.*)') |
+      regex_replace('JWT_SECRET =', '') |
+      regex_replace(' ', '')
+
+- name: Ensure gitea configuration file exists
+  ansible.builtin.template:
+    src: gitea-app.ini.j2
+    dest: /var/lib/gitea/custom/conf/app.ini
+    mode: 0644
+    owner: "{{ gitea_user_name }}"
+    group: "{{ gitea_user_group}}"
+  notify: Restart gitea service
+
+- name: Ensure gitea service is present
+  ansible.builtin.template:
+    src: gitea.service.j2
+    dest: /etc/systemd/system/gitea.service
+    mode: 0644
+    owner: root
+    group: root
+  notify: Restart gitea service
+
+- name: Ensure gitea service socket is present
+  ansible.builtin.copy:
+    src: gitea.main.socket
+    dest: /etc/systemd/system/gitea.main.socket
+    mode: 0644
+    owner: root
+    group: root
+  notify: Restart gitea socket
+
+- name: Ensure gitea socket is enabled and running
+  ansible.builtin.service:
+    name: gitea.main.socket
+    state: started
+    enabled: true
+
+- name: Ensure gitea service is enabled and running
+  ansible.builtin.service:
+    name: gitea.service
+    state: started
+    enabled: true
