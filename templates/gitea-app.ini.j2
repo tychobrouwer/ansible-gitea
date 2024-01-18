@@ -14,8 +14,7 @@ DISABLE_SSH = false
 SSH_PORT = 22
 LFS_START_SERVER = true
 {% if gitea_lfs_jwt_secret is defined %}
-LFS_JWT_SECRET = {{ gitea_lfs_jwt_secret }}
-{% endif %}
+LFS_JWT_SECRET = {{ gitea_lfs_jwt_secret }}{% endif %}
 OFFLINE_MODE = false
 
 [database]
@@ -23,8 +22,8 @@ DB_TYPE = postgres
 HOST = 127.0.0.1:5432
 NAME = {{ gitea_db_name }}
 USER = {{ gitea_db_user }}
-PASSWD = `{{ gitea_db_password }}`
-SCHEMA =
+PASSWD = {{ gitea_db_password }}
+SCHEMA = 
 SSL_MODE = disable
 PATH = /var/lib/gitea/data/gitea.db
 LOG_SQL = false
@@ -74,11 +73,9 @@ DEFAULT_TRUST_MODEL = committer
 [security]
 INSTALL_LOCK = true
 {% if gitea_internal_token is defined %}
-INTERNAL_TOKEN = {{ gitea_internal_token }}
-{% endif %}
+INTERNAL_TOKEN = {{ gitea_internal_token }}{% endif %}
 PASSWORD_HASH_ALGO = pbkdf2
 
 [oauth2]
 {% if gitea_jwt_secret is defined %}
-JWT_SECRET = {{ gitea_jwt_secret }}
-{% endif %}
+JWT_SECRET = {{ gitea_jwt_secret }}{% endif %}
