@@ -1,4 +1,4 @@
-APP_NAME = "Tycho Brouwer's Gitea"
+APP_NAME = {{ gitea_app_name }}
 RUN_USER = {{ gitea_user_name }}
 WORK_PATH = /var/lib/gitea
 RUN_MODE = prod
@@ -23,7 +23,7 @@ DB_TYPE = postgres
 HOST = 127.0.0.1:5432
 NAME = {{ gitea_db_name }}
 USER = {{ gitea_db_user }}
-PASSWD = `{{ gitea_db_user_password }}`
+PASSWD = `{{ gitea_db_password }}`
 SCHEMA =
 SSL_MODE = disable
 PATH = /var/lib/gitea/data/gitea.db

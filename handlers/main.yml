@@ -4,10 +4,13 @@
   ansible.builtin.service:
     name: gitea
     state: restarted
-    enabled: true
 
 - name: Restart gitea socket
   ansible.builtin.service:
     name: gitea.main.socket
     state: restarted
-    enabled: true
+
+- name: Restart postgresql service
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted

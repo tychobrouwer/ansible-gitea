@@ -4,4 +4,5 @@
 
   roles:
     - role: ansible-gitea
-      password: password123
+      gitea_db_password: password123
+      gitea_app_name: Tycho Brouwer's Gitea
