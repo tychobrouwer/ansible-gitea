@@ -1,6 +1,5 @@
 ---
 # tasks file for ansible-gitea
----
 - name: Add gitea git user
   ansible.builtin.user:
     name: "{{ gitea_user_name }}"
@@ -15,16 +14,16 @@
     path: "/home/{{ gitea_user_name }}/repositories"
     state: directory
     owner: "{{ gitea_user_name }}"
-    group: "{{ gitea_user_group}}"
-    mode: 0755
+    group: "{{ gitea_user_group }}"
+    mode: "0755"
 
 - name: Ensure LFS directory exists
   ansible.builtin.file:
     path: "/home/{{ gitea_user_name }}/lfs"
     state: directory
     owner: "{{ gitea_user_name }}"
-    group: "{{ gitea_user_group}}"
-    mode: 0755
+    group: "{{ gitea_user_group }}"
+    mode: "0755"
 
 - name: Update cache
   ansible.builtin.apt:
@@ -48,7 +47,7 @@
       - gitea
       - postgresql
       - postgresql-contrib
-    state: latest
+    state: present
 
 - name: Set postgresql password encryption
   ansible.builtin.lineinfile:
@@ -63,7 +62,6 @@
     password: "{{ gitea_db_password }}"
   become: true
   become_user: postgres
-  become_method: su
 
 - name: Ensure a locale exists
   community.general.locale_gen:
@@ -104,19 +102,19 @@
 
 - name: Set tokens from config
   ansible.builtin.set_fact:
-    gitea_INTERNAL_TOKEN: >
+    gitea_internal_token: >
       gitea_config.content |
       b64decode |
       regex_search('INTERNAL_TOKEN =(.*)') |
       regex_replace('INTERNAL_TOKEN =', '') |
       regex_replace(' ', '')
-    gitea_LFS_JWT_SECRET: >
+    gitea_lfs_jwt_secret: >
       gitea_config.content |
       b64decode |
       regex_search('LFS_JWT_SECRET =(.*)') |
       regex_replace('LFS_JWT_SECRET =', '') |
       regex_replace(' ', '')
-    gitea_JWT_SECRET: >
+    gitea_jwt_secret: >
       gitea_config.content |
       b64decode |
       regex_search('JWT_SECRET =(.*)') |
@@ -127,16 +125,16 @@
   ansible.builtin.template:
     src: gitea-app.ini.j2
     dest: /var/lib/gitea/custom/conf/app.ini
-    mode: 0644
+    mode: "0644"
     owner: "{{ gitea_user_name }}"
-    group: "{{ gitea_user_group}}"
+    group: "{{ gitea_user_group }}"
   notify: Restart gitea service
 
 - name: Ensure gitea service is present
   ansible.builtin.template:
     src: gitea.service.j2
     dest: /etc/systemd/system/gitea.service
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   notify: Restart gitea service
@@ -145,7 +143,7 @@
   ansible.builtin.copy:
     src: gitea.main.socket
     dest: /etc/systemd/system/gitea.main.socket
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   notify: Restart gitea socket
