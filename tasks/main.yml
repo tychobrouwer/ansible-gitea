@@ -130,21 +130,21 @@
     gitea_internal_token: >
       {{ gitea_config.content |
       b64decode |
-      regex_search('INTERNAL_TOKEN =(.*)') |
-      regex_replace('INTERNAL_TOKEN =', '') |
-      regex_replace(' ', '') }}
+      regex_search('\nINTERNAL_TOKEN =(.*)') |
+      regex_replace('\nINTERNAL_TOKEN = ', '')
+      | trim }}
     gitea_lfs_jwt_secret: >
       {{ gitea_config.content |
       b64decode |
-      regex_search('LFS_JWT_SECRET =(.*)') |
-      regex_replace('LFS_JWT_SECRET =', '') |
-      regex_replace(' ', '') }}
+      regex_search('\nLFS_JWT_SECRET =(.*)') |
+      regex_replace('\nLFS_JWT_SECRET = ', '')
+      | trim }}
     gitea_jwt_secret: >
       {{ gitea_config.content |
       b64decode |
-      regex_search('JWT_SECRET =(.*)') |
-      regex_replace('JWT_SECRET =', '') |
-      regex_replace(' ', '') }}
+      regex_search('\nJWT_SECRET =(.*)') |
+      regex_replace('\nJWT_SECRET = ', '')
+      | trim }}
   when: gitea_config_exists.stat.exists
 
 - name: Ensure gitea configuration directory exists
@@ -159,7 +159,7 @@
   ansible.builtin.template:
     src: gitea-app.ini.j2
     dest: /var/lib/gitea/custom/conf/app.ini
-    mode: "0644"
+    mode: "0600"
     owner: "{{ gitea_user_name }}"
     group: "{{ gitea_user_group }}"
   notify: Restart gitea service
