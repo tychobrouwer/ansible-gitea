@@ -5,10 +5,10 @@ RUN_MODE = prod
 
 [server]
 LOCAL_ROOT_URL = http://localhost:{{ gitea_port }}/
-SSH_DOMAIN = {{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}
-DOMAIN = {{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}
+SSH_DOMAIN = {{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}
+DOMAIN = {{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}
 HTTP_PORT = {{ gitea_port }}
-ROOT_URL = http://{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:{{ gitea_port }}/
+ROOT_URL = http://{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}:{{ gitea_port }}/
 APP_DATA_PATH = /var/lib/gitea/data
 DISABLE_SSH = false
 SSH_PORT = 22
