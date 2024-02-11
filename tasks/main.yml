@@ -82,8 +82,11 @@
   community.postgresql.postgresql_user:
     name: "{{ gitea_db_user }}"
     password: "{{ gitea_db_password }}"
-  # become: true
-  # become_user: postgres
+  become: true
+  become_method: su
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: no
 
 - name: Create the gitea database
   community.postgresql.postgresql_db:
@@ -93,8 +96,11 @@
     lc_ctype: en_US.UTF-8
     template: template0
     owner: "{{ gitea_db_user }}"
-  # become: true
-  # become_user: postgres
+  become: true
+  become_method: su
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: no
 
 - name: Grant gitea user access to database
   community.postgresql.postgresql_pg_hba:
@@ -109,8 +115,11 @@
   community.postgresql.postgresql_user:
     db: "{{ gitea_db_name }}"
     name: "{{ gitea_db_user }}"
-  # become: true
-  # become_user: postgres
+  become: true
+  become_method: su
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: no
 
 - name: Check if gitea config exists
   ansible.builtin.stat:
