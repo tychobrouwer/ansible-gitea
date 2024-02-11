@@ -4,7 +4,8 @@
   ansible.builtin.user:
     name: "{{ gitea_user_name }}"
     home: "/home/{{ gitea_user_name }}"
-    shell: /usr/sbin/nologin
+    shell: /bin/bash
+    password: "!"
     comment: Git Version Control
 
 - name: Ensure repositories directory exists
