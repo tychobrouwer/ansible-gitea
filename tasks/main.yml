@@ -24,21 +24,6 @@
     group: "{{ gitea_user_group }}"
     mode: "0755"
 
-- name: Update cache
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-
-- name: Install gitea and database packages
-  ansible.builtin.package:
-    name:
-      - git
-      - postgresql
-      - postgresql-contrib
-      - python3-psycopg2
-      - gnupg
-    state: present
-
 - name: Ensure gitea GPG signing key is installed
   ansible.builtin.apt_key:
     url: "{{ gitea_deb_gpg }}"
@@ -49,10 +34,20 @@
     repo: "{{ gitea_deb_repo }}"
     state: present
 
+- name: Update cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
 - name: Install gitea and database packages
   ansible.builtin.package:
     name:
+      - git
       - gitea
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2
+      - gnupg
     state: present
 
 - name: Get postgresql Version
