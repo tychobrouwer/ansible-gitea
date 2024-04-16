@@ -29,10 +29,10 @@ PATH = /var/lib/gitea/data/gitea.db
 LOG_SQL = false
 
 [repository]
-ROOT = /home/{{ gitea_user_name }}/repositories
+ROOT = {{ gitea_path }}/repositories
 
 [lfs]
-PATH = /home/{{ gitea_user_name }}/lfs
+PATH = {{ gitea_path }}/lfs
 
 [mailer]
 ENABLED = false

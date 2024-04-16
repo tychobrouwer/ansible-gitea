@@ -25,7 +25,7 @@ Example Playbook
          - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_app_name: "Tycho Brouwer's Gitea" }
          - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_app_name: "Tycho Brouwer's Gitea",
              gitea_user_name: "gitea", gitea_user_group: "gitea", gitea_db_user: "gitea",
-             gitea_db_name: "gitea", gitea_port: 3000 }
+             gitea_db_name: "gitea", gitea_port: 3000, gitea_path: "/home/gitea" }
 ```
 
 License

@@ -8,3 +8,5 @@ gitea_db_user: gitea
 gitea_user_name: gitea
 gitea_user_group: gitea
 gitea_port: 3000
+
+gitea_path: /home/{{ gitea_user_name }}
