@@ -1,9 +1,9 @@
 ---
 # handlers file for ansible-gitea
-- name: Restart postgresql service
-  ansible.builtin.service:
-    name: postgresql
-    state: restarted
+# - name: Restart postgresql service
+#   ansible.builtin.service:
+#     name: postgresql
+#     state: restarted
 
 - name: Restart gitea socket
   ansible.builtin.service:

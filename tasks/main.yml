@@ -86,7 +86,7 @@
 #   become_method: su
 #   become_user: postgres
 #   vars:
-#     ansible_ssh_pipelining: no
+#     ansible_ssh_pipelining: true
 
 # - name: Create the gitea database
 #   community.postgresql.postgresql_db:
@@ -100,7 +100,7 @@
 #   become_method: su
 #   become_user: postgres
 #   vars:
-#     ansible_ssh_pipelining: no
+#     ansible_ssh_pipelining: true
 
 # - name: Grant gitea user access to database
 #   community.postgresql.postgresql_pg_hba:
@@ -119,7 +119,7 @@
 #   become_method: su
 #   become_user: postgres
 #   vars:
-#     ansible_ssh_pipelining: no
+#     ansible_ssh_pipelining: true
 
 - name: Check if gitea config exists
   ansible.builtin.stat:
