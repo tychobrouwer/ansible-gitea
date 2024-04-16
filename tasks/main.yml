@@ -198,3 +198,13 @@
     name: gitea.service
     state: started
     enabled: true
+
+- name: Create Gitea admin user
+  ansible.builtin.command: gitea admin create-user --name {{ gitea_admin_user }} --password {{ gitea_admin_password }} --email {{ gitea_admin_email }} --admin --config /var/lib/gitea/custom/conf/app.ini
+  register: gitea_admin_user_created
+  changed_when: '"user already exists" not in gitea_admin_user_created.stdout'
+  become: true
+  become_user: "{{ gitea_user_name }}"
+  become_method: su
+  vars:
+    ansible_ssh_pipelining: false

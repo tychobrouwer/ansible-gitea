@@ -22,8 +22,8 @@ Example Playbook
 ```yaml
     - hosts: servers
       roles:
-         - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_app_name: "Tycho Brouwer's Gitea" }
-         - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_app_name: "Tycho Brouwer's Gitea",
+         - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_app_name: "Tycho Brouwer's Gitea", gitea_admin_user: "tychobrouwer", gitea_admin_password: "password", gitea_admin_email: "email@email.com" }
+         - { role: tychobrouwer.gitea, gitea_db_password: "password", gitea_app_name: "Tycho Brouwer's Gitea", gitea_admin_user: "tychobrouwer", gitea_admin_password: "password", gitea_admin_email: "email@email.com",
              gitea_user_name: "gitea", gitea_user_group: "gitea", gitea_db_user: "gitea",
              gitea_db_name: "gitea", gitea_port: 3000, gitea_path: "/home/gitea" }
 ```
