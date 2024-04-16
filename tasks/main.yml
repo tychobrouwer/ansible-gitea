@@ -49,78 +49,77 @@
     name:
       - git
       - gitea
-      - postgresql
-      - postgresql-contrib
-      - python3-psycopg2
-      - gnupg
+      # - postgresql
+      # - postgresql-contrib
+      # - python3-psycopg2
     state: present
 
-- name: Get postgresql Version
-  ansible.builtin.command: "psql --version"
-  changed_when: false
-  register: postgresql_version_raw
+# - name: Get postgresql Version
+#   ansible.builtin.command: "psql --version"
+#   changed_when: false
+#   register: postgresql_version_raw
 
-- name: Set postgresql password encryption
-  ansible.builtin.lineinfile:
-    path: "/etc/postgresql/{{ postgresql_version_raw | regex_search('\\d\\d') }}/main/postgresql.conf"
-    regexp: "^password_encryption = "
-    insertafter: "^#password_encryption = "
-    line: password_encryption = scram-sha-256
+# - name: Set postgresql password encryption
+#   ansible.builtin.lineinfile:
+#     path: "/etc/postgresql/{{ postgresql_version_raw | regex_search('\\d\\d') }}/main/postgresql.conf"
+#     regexp: "^password_encryption = "
+#     insertafter: "^#password_encryption = "
+#     line: password_encryption = scram-sha-256
 
-- name: Ensure a locale exists
-  community.general.locale_gen:
-    name: en_US.UTF-8
-    state: present
-  notify: Restart postgresql service
+# - name: Ensure a locale exists
+#   community.general.locale_gen:
+#     name: en_US.UTF-8
+#     state: present
+#   notify: Restart postgresql service
 
-- name: Start postgresql service
-  ansible.builtin.service:
-    name: postgresql
-    state: started
-    enabled: true
+# - name: Start postgresql service
+#   ansible.builtin.service:
+#     name: postgresql
+#     state: started
+#     enabled: true
 
-- name: Create the gitea database user
-  community.postgresql.postgresql_user:
-    name: "{{ gitea_db_user }}"
-    password: "{{ gitea_db_password }}"
-  become: true
-  become_method: su
-  become_user: postgres
-  vars:
-    ansible_ssh_pipelining: no
+# - name: Create the gitea database user
+#   community.postgresql.postgresql_user:
+#     name: "{{ gitea_db_user }}"
+#     password: "{{ gitea_db_password }}"
+#   become: true
+#   become_method: su
+#   become_user: postgres
+#   vars:
+#     ansible_ssh_pipelining: no
 
-- name: Create the gitea database
-  community.postgresql.postgresql_db:
-    name: "{{ gitea_db_name }}"
-    encoding: UTF-8
-    lc_collate: en_US.UTF-8
-    lc_ctype: en_US.UTF-8
-    template: template0
-    owner: "{{ gitea_db_user }}"
-  become: true
-  become_method: su
-  become_user: postgres
-  vars:
-    ansible_ssh_pipelining: no
+# - name: Create the gitea database
+#   community.postgresql.postgresql_db:
+#     name: "{{ gitea_db_name }}"
+#     encoding: UTF-8
+#     lc_collate: en_US.UTF-8
+#     lc_ctype: en_US.UTF-8
+#     template: template0
+#     owner: "{{ gitea_db_user }}"
+#   become: true
+#   become_method: su
+#   become_user: postgres
+#   vars:
+#     ansible_ssh_pipelining: no
 
-- name: Grant gitea user access to database
-  community.postgresql.postgresql_pg_hba:
-    dest: "/etc/postgresql/{{ postgresql_version_raw | regex_search('\\d\\d') }}/main/pg_hba.conf"
-    contype: local
-    users: "{{ gitea_db_user }}"
-    databases: "{{ gitea_db_name }}"
-    method: scram-sha-256
-    create: true
+# - name: Grant gitea user access to database
+#   community.postgresql.postgresql_pg_hba:
+#     dest: "/etc/postgresql/{{ postgresql_version_raw | regex_search('\\d\\d') }}/main/pg_hba.conf"
+#     contype: local
+#     users: "{{ gitea_db_user }}"
+#     databases: "{{ gitea_db_name }}"
+#     method: scram-sha-256
+#     create: true
 
-- name: Connect to database
-  community.postgresql.postgresql_user:
-    db: "{{ gitea_db_name }}"
-    name: "{{ gitea_db_user }}"
-  become: true
-  become_method: su
-  become_user: postgres
-  vars:
-    ansible_ssh_pipelining: no
+# - name: Connect to database
+#   community.postgresql.postgresql_user:
+#     db: "{{ gitea_db_name }}"
+#     name: "{{ gitea_db_user }}"
+#   become: true
+#   become_method: su
+#   become_user: postgres
+#   vars:
+#     ansible_ssh_pipelining: no
 
 - name: Check if gitea config exists
   ansible.builtin.stat:
