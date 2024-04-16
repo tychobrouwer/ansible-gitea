@@ -1,5 +1,10 @@
 ---
 # tasks file for ansible-gitea
+- name: Install packages
+  ansible.builtin.package:
+    name: gnupg
+    state: present
+
 - name: Add gitea git user
   ansible.builtin.user:
     name: "{{ gitea_user_name }}"
