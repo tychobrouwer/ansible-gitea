@@ -1,95 +1,73 @@
 ---
 # tasks file for ansible-gitea
-- name: Install packages
+- name: Install gnupg
   ansible.builtin.package:
     name: gnupg
     state: present
 
-- name: Add gitea git user
+- name: Add Gitea git user
   ansible.builtin.user:
     name: "{{ gitea_user_name }}"
     home: "/home/{{ gitea_user_name }}"
     shell: /bin/bash
     password: "!"
-    comment: Git Version Control
+    comment: "Git Version Control"
 
-- name: Ensure repositories directory exists
+- name: Ensure required directories exist
   ansible.builtin.file:
-    path: "/home/{{ gitea_user_name }}/repositories"
+    path: "{{ item }}"
     state: directory
     owner: "{{ gitea_user_name }}"
     group: "{{ gitea_user_group }}"
     mode: "0755"
+  with_items:
+    - "/home/{{ gitea_user_name }}/repositories"
+    - "/home/{{ gitea_user_name }}/lfs"
+    - "/var/lib/gitea/custom/conf"
 
-- name: Ensure LFS directory exists
-  ansible.builtin.file:
-    path: "/home/{{ gitea_user_name }}/lfs"
-    state: directory
-    owner: "{{ gitea_user_name }}"
-    group: "{{ gitea_user_group }}"
-    mode: "0755"
-
-- name: Ensure gitea GPG signing key is installed
+- name: Ensure Gitea GPG signing key is installed
   ansible.builtin.apt_key:
     url: "{{ gitea_deb_gpg }}"
+    keyring: /usr/share/keyrings/gitea-archive-keyring.gpg
     state: present
 
-- name: Ensure gitea repository is added
+- name: Ensure Gitea repository is added
   ansible.builtin.apt_repository:
     repo: "{{ gitea_deb_repo }}"
+    filename: gitea
     state: present
 
-- name: Update cache
+- name: Update APT cache
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
-- name: Install gitea and database packages
+- name: Install Gitea and Git
   ansible.builtin.package:
     name:
       - git
       - gitea
     state: present
 
-- name: Check if gitea config exists
+- name: Check if Gitea config exists
   ansible.builtin.stat:
     path: /var/lib/gitea/custom/conf/app.ini
   register: gitea_config_exists
 
-- name: Get current gitea config
+- name: Read existing Gitea config
   ansible.builtin.slurp:
     src: /var/lib/gitea/custom/conf/app.ini
   register: gitea_config
   when: gitea_config_exists.stat.exists
 
-- name: Set tokens from config
+- name: Extract tokens from Gitea config
   ansible.builtin.set_fact:
-    gitea_internal_token: >
-      {{ gitea_config.content |
-      b64decode |
-      regex_search('\nINTERNAL_TOKEN =(.*)') |
-      regex_replace('\nINTERNAL_TOKEN = ', '') }}
-    gitea_lfs_jwt_secret: >
-      {{ gitea_config.content |
-      b64decode |
-      regex_search('\nLFS_JWT_SECRET =(.*)') |
-      regex_replace('\nLFS_JWT_SECRET = ', '') }}
-    gitea_jwt_secret: >
-      {{ gitea_config.content |
-      b64decode |
-      regex_search('\nJWT_SECRET =(.*)') |
-      regex_replace('\nJWT_SECRET = ', '') }}
+    gitea_internal_token: "{{ (gitea_config.content | b64decode | regex_search('INTERNAL_TOKEN *= *(.*)', '\\1')) | default('', true) }}"
+    gitea_lfs_jwt_secret: "{{ (gitea_config.content | b64decode | regex_search('LFS_JWT_SECRET *= *(.*)', '\\1')) | default('', true) }}"
+    gitea_jwt_secret: "{{ (gitea_config.content | b64decode | regex_search('JWT_SECRET *= *(.*)', '\\1')) | default('', true) }}"
   when: gitea_config_exists.stat.exists
 
-- name: Ensure gitea configuration directory exists
-  ansible.builtin.file:
-    path: /var/lib/gitea/custom/conf
-    state: directory
-    owner: "{{ gitea_user_name }}"
-    group: "{{ gitea_user_group }}"
-    mode: "0755"
-
-- name: Ensure gitea configuration file exists
+- name: Ensure Gitea configuration file exists
   ansible.builtin.template:
     src: gitea-app.ini.j2
     dest: /var/lib/gitea/custom/conf/app.ini
@@ -98,7 +76,7 @@
     group: "{{ gitea_user_group }}"
   notify: Restart gitea service
 
-- name: Ensure gitea service is present
+- name: Ensure Gitea service unit file is present
   ansible.builtin.template:
     src: gitea.service.j2
     dest: /etc/systemd/system/gitea.service
@@ -107,7 +85,7 @@
     group: root
   notify: Restart gitea service
 
-- name: Ensure gitea service socket is present
+- name: Ensure Gitea socket unit file is present
   ansible.builtin.copy:
     src: gitea.main.socket
     dest: /etc/systemd/system/gitea.main.socket
@@ -116,30 +94,29 @@
     group: root
   notify: Restart gitea socket
 
-- name: Ensure gitea socket is enabled and running
-  ansible.builtin.service:
+- name: Enable and start Gitea service
+  ansible.builtin.systemd:
     name: gitea.main.socket
     state: started
     enabled: true
 
 - name: Ensure gitea service is enabled and running
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: gitea.service
     state: started
     enabled: true
 
 - name: Create Gitea admin user
-  ansible.builtin.command: >
-    gitea admin create-user
-    --name {{ gitea_admin_user }}
-    --password {{ gitea_admin_password }}
-    --email {{ gitea_admin_email }}
-    --admin
+  ansible.builtin.shell: |
+    gitea admin create-user \
+    --name "{{ gitea_admin_user }}" \
+    --password "{{ gitea_admin_password }}" \
+    --email "{{ gitea_admin_email }}" \
+    --admin \
     --config /var/lib/gitea/custom/conf/app.ini
   register: gitea_admin_user_created
   changed_when: '"user already exists" not in gitea_admin_user_created.stdout'
   become: true
   become_user: "{{ gitea_user_name }}"
-  become_method: su
   vars:
     ansible_ssh_pipelining: false
