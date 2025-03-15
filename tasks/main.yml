@@ -118,6 +118,7 @@
   # changed_when: '"user already exists" not in gitea_admin_user_created.stderr'
   become: true
   become_user: "{{ gitea_user_name }}"
+  become_method: su
   vars:
     ansible_ssh_pipelining: false
 
