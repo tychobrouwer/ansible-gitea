@@ -116,6 +116,7 @@
     --config /var/lib/gitea/custom/conf/app.ini
   register: gitea_admin_user_created
   changed_when: '"user already exists" not in gitea_admin_user_created.stderr'
+  failed_when: gitea_admin_user_created.rc != 0 and '"user already exists" not in gitea_admin_user_created.stderr'
   become: true
   become_user: "{{ gitea_user_name }}"
   become_method: su
