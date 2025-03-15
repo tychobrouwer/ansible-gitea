@@ -108,7 +108,7 @@
 
 - name: Create Gitea admin user
   ansible.builtin.shell: |
-    gitea admin create-user \
+    gitea admin create user \
     --name "{{ gitea_admin_user }}" \
     --password "{{ gitea_admin_password }}" \
     --email "{{ gitea_admin_email }}" \
