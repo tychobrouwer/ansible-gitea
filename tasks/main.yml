@@ -123,6 +123,3 @@
   vars:
     ansible_ssh_pipelining: false
 
-- name: debug
-  ansible.builtin.debug:
-    var: gitea_admin_user_created
