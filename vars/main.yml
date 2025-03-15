@@ -9,3 +9,6 @@ gitea_port: 3000
 gitea_app_name: Gitea
 
 gitea_path: /home/{{ gitea_user_name }}
+
+gitea_db_user: "gitea"
+gitea_db_name: "gitea"
